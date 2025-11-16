@@ -27,13 +27,22 @@ criar_tabelas_com_retry()
 # Cria a aplicação FastAPI
 app = FastAPI(title="ImuneTrack API")
 
+origins = [
+    # Adicionar aqui a URL do Front-end:
+    "https://testetesteteste312-front.onrender.com", 
+    
+    # Adicione também a URL do seu Serviço de Auth, por segurança:
+    "https://auth-cihu.onrender.com", 
+    
+    # URLs de desenvolvimento local (se você as usar):
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+]
+
 # Adiciona CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
