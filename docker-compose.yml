@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: imunetrack-db
+    restart: always
+    environment:
+      POSTGRES_USER: imunetrack_user
+      POSTGRES_PASSWORD: imunetrack_pass
+      POSTGRES_DB: imunetrack_user
+    ports:
+      - "5433:5432"
+    volumes:
+      - imunetrack_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U imunetrack_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build: .
+    container_name: imunetrack-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ENV=dev
+      - DATABASE_URL=postgresql+psycopg2://imunetrack_user:imunetrack_pass@db:5432/imunetrack_user
+      - AUTH_SERVICE_URL=http://imunetrack-auth:8000
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  tests:
+    build: .
+    container_name: imunetrack-tests
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ENV=test
+      - DATABASE_URL=sqlite:///./test_imunetrack.db
+    command: >
+      pytest -v --disable-warnings --maxfail=1
+    volumes:
+      - .:/app
+    restart: "no"
+
+volumes:
+  imunetrack_data:
+
+networks:
+  imunetrack-network:
+    external: true

@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+psycopg2-binary
+sqlalchemy
+python-jose
+passlib[bcrypt]
+pydantic
+pydantic[email]
+pytest
+httpx
+bcrypt==4.3.0
+alembic
+APScheduler
